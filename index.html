@@ -542,7 +542,7 @@ const DATA=[
     {n:"Lecture 16: Skill 5–Consider Your Questions",t:28,lec:16},
     {n:"Lecture 17: Skill 6–Know the Experience, Part 1",t:37,lec:17},
     {n:"Lecture 18: Skill 6–Know the Experience, Part 2",t:37,lec:18},
-    {n:"Role Play 1",t:33},
+    {n:"Role Play 1",t:33,lec:35},
   ]},
   {label:"Read",type:"read",tasks:[
     {n:"Welch, Side by Side, chs. 10–12",t:45},
@@ -605,7 +605,7 @@ const DATA=[
     {n:"Lecture 26: Skill 4–Keep in Step with the Spirit, Part 1",t:46,lec:26},
     {n:"Lecture 27: Skill 4–Keep in Step with the Spirit, Part 2",t:33,lec:27},
     {n:"Lecture 28: Skill 5–Access Scripture Together",t:32,lec:28},
-    {n:"Role Play 2",t:19},
+    {n:"Role Play 2",t:19,lec:36},
   ]},
   {label:"Read",type:"read",tasks:[
     {n:"Welch, Caring for One Another, Preface–Lesson 5",t:45},
@@ -643,7 +643,7 @@ const DATA=[
     {n:"Lecture 32: Skill 8–Skills with Sufferers",t:47,lec:32},
     {n:"Lecture 33: Skill 9–Retell Stories",t:39,lec:33},
     {n:"Lecture 34: Closing",t:14,lec:34},
-    {n:"Role Play 3",t:45},
+    {n:"Role Play 3",t:45,lec:37},
   ]},
   {label:"Read",type:"read",tasks:[
     {n:"Yalom, The Gift of Therapy, chs. 71–85",t:75},
@@ -666,9 +666,47 @@ const DATA=[
 ]},
 ];
 
-// Audio links — add Google Drive URLs here once uploaded
-// Format: AUDIO[lectureNumber] = 'https://drive.google.com/uc?export=download&id=FILE_ID';
-const AUDIO = {};
+// Audio links — Google Drive
+const AUDIO = {
+  1: 'https://drive.google.com/uc?export=open&id=1Z-Yl9pCsoLUV8_5W3lw40LxPBGNzjgAZ',
+  2: 'https://drive.google.com/uc?export=open&id=1kpfL6P81RnNHub38HQq-L4nDCC7Ic66H',
+  3: 'https://drive.google.com/uc?export=open&id=1MEdmTkyQmOl0Pbj8bjk0wdyO5qlerfXr',
+  4: 'https://drive.google.com/uc?export=open&id=11TurV2G4qC_25Wgrraiy0VoM71WVBzAV',
+  5: 'https://drive.google.com/uc?export=open&id=1Fh2ylKK0hGARCC2-m-1hxAvDdIniTRLL',
+  6: 'https://drive.google.com/uc?export=open&id=1iKKn6MheZAw_4rKxeXCNLGWOKvOk6UIY',
+  7: 'https://drive.google.com/uc?export=open&id=1XYl67LFVfPgpnCdQG1RUYRkJqF3VwMbG',
+  8: 'https://drive.google.com/uc?export=open&id=1Ala-f2Cn6Eohdrxtqgu4G42izu3QNUlQ',
+  9: 'https://drive.google.com/uc?export=open&id=1HkIuLElWGqFXMuiYD0afMGgBbae9uVoz',
+  10: 'https://drive.google.com/uc?export=open&id=1GXeZMYCXr-UCWdGInd5Z8Y1zEzTPyd8v',
+  11: 'https://drive.google.com/uc?export=open&id=1CQFLd98TLL08OEBezf5YIT-i8vOzPWGC',
+  12: 'https://drive.google.com/uc?export=open&id=1T35Nyv8VAODENcnRHWDwQ1NEH_t3EhvR',
+  13: 'https://drive.google.com/uc?export=open&id=177LHW0-noTMSOsp0F9CWDKOBzkm4ta3q',
+  14: 'https://drive.google.com/uc?export=open&id=1KcU19yCL72trBavsPnZMfT2PsbxhMUb4',
+  15: 'https://drive.google.com/uc?export=open&id=1GznqNoRlK2MdAinqcj9NL8Tp0830MfZ4',
+  16: 'https://drive.google.com/uc?export=open&id=1vingMq9VM5lmm9GLxo3XkWAMp_Ws-fmF',
+  17: 'https://drive.google.com/uc?export=open&id=1luyyy6ZSzErutMTm9QZm2UA02M2O0bsf',
+  18: 'https://drive.google.com/uc?export=open&id=1q1L96DHk0yWFjuIx2ymBJE5wA3PT6NP9',
+  19: 'https://drive.google.com/uc?export=open&id=1Gud01YsCrNEMjyUiWtp2tnm7C-7SGW6H',
+  20: 'https://drive.google.com/uc?export=open&id=1A1YhbmeG09Piq5JG9ZC9xF74P2OaF7wA',
+  21: 'https://drive.google.com/uc?export=open&id=1Iy8_w3o0EeyBbrinhh8hC86kLpOjLJlb',
+  22: 'https://drive.google.com/uc?export=open&id=1rvG9sViaCYnPpqQHnnQpK6758P11IvZ5',
+  23: 'https://drive.google.com/uc?export=open&id=14Bv8Q8cZ7Iop-yFK3cy3TZ48i7fNpqUC',
+  24: 'https://drive.google.com/uc?export=open&id=1SwZhG9wVZeG4OyTPY5wcrQCYeuY6B93K',
+  25: 'https://drive.google.com/uc?export=open&id=1JFuW0U6KtcG0Woc-KYzLCLgn406QG7fl',
+  26: 'https://drive.google.com/uc?export=open&id=1e3-ErdM91SpYY346H3M1ga9IIYvi9fB1',
+  27: 'https://drive.google.com/uc?export=open&id=1wYs1fi9e_SrF0xxFY94OmjQBD2OPA2FZ',
+  28: 'https://drive.google.com/uc?export=open&id=1EdPMVB-GY58FbLyLJ3QevSNN7Hk_3s7Z',
+  29: 'https://drive.google.com/uc?export=open&id=1OSCU92Xzc4niOdzYZ0g69lForZWyNE8X',
+  30: 'https://drive.google.com/uc?export=open&id=15R9W5lMu9ZgqdC--HcsuSghInK-tEQ05',
+  31: 'https://drive.google.com/uc?export=open&id=1zYsWBarRNx9cNbUqC4IpZV9BauLsdKsi',
+  32: 'https://drive.google.com/uc?export=open&id=19sXGqlBLGflLCo-KdfDOCZUVmO0qWQpe',
+  33: 'https://drive.google.com/uc?export=open&id=1yTQaAOY8sZNPr0haZBP0VMASwm6vQURE',
+  34: 'https://drive.google.com/uc?export=open&id=1mdG-PYRlPImWlmZ5D8ijcudqW17l9fpa',
+  // Role Plays (files 35-37)
+  35: 'https://drive.google.com/uc?export=open&id=1h8bgAMix1JJjCSDmUo0PRj5gI2WLZgHS',
+  36: 'https://drive.google.com/uc?export=open&id=1TG2JZMUyYitENIXIneIORLVJ5HQSYJ2T',
+  37: 'https://drive.google.com/uc?export=open&id=18dOjRX1zcpJIsRqmli5x1MBOO6Czy_jq',
+};
 
 // ── State ──────────────────────────────────────────────────
 let checked={}, notesData={}, filter='all', openWeeks=new Set([1]);
