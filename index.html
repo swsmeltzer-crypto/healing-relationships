@@ -1382,10 +1382,8 @@ function openNotes(lecNum, taskName){
   }
   document.getElementById('panel-title').textContent = title;
 
-  // Decide default tab
-  const sm = currentCourse === 'hr' ? SUMMARIES[lecNum] : null;
-  const hasDet = currentCourse === 'dbc' && DBC_DETAILED[lecNum];
-  activeTab = sm ? 'summary' : (hasDet ? 'detailed' : 'outline');
+  // Default tab is always Outline
+  activeTab = 'outline';
 
   renderNotesContent(lecNum);
   document.getElementById('notes-page').classList.add('open');
@@ -1408,9 +1406,9 @@ function renderNotesContent(lecNum){
 
   const tabs = `
     <div class="notes-tabs">
+      <button class="notes-tab${activeTab==='outline'?' active':''}" onclick="switchTab('outline')">Outline</button>
       ${sm ? `<button class="notes-tab${activeTab==='summary'?' active':''}" onclick="switchTab('summary')">Summary</button>` : ''}
       ${det ? `<button class="notes-tab${activeTab==='detailed'?' active':''}" onclick="switchTab('detailed')">Detailed Notes</button>` : ''}
-      <button class="notes-tab${activeTab==='outline'?' active':''}" onclick="switchTab('outline')">Outline</button>
       <button class="notes-tab${activeTab==='mynotes'?' active':''}" onclick="switchTab('mynotes')">My Notes</button>
     </div>`;
 
