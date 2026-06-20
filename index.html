@@ -1634,9 +1634,73 @@ function openDraft(taskId, taskName){
   window.scrollTo(0,0);
 }
 
+function buildAssignmentTemplate(taskName){
+  const a = HR_ASSIGNMENTS[taskName];
+  if(!a) return '';
+  let lines = [];
+  const addQ = (q)=>{ lines.push(q); lines.push(''); lines.push(''); };
+  if(a.questions && a.questions.length){
+    a.questions.forEach(addQ);
+  }
+  if(a.sections && a.sections.length){
+    a.sections.forEach(s=>{
+      lines.push(s.heading.toUpperCase());
+      lines.push('');
+      if(s.questions && s.questions.length){
+        s.questions.forEach(addQ);
+      } else {
+        lines.push('');
+        lines.push('');
+      }
+    });
+  }
+  return lines.join('\n').trim();
+}
+
+function useTemplate(){
+  const ta = document.getElementById('draft-textarea');
+  if(ta.value.trim() && !confirm('This will replace your current draft text with the question template. Continue?')){
+    return;
+  }
+  const template = buildAssignmentTemplate(document.getElementById('draft-page-title').textContent);
+  ta.value = template;
+  saveDraft(template);
+  ta.focus();
+}
+
 function renderAssignmentPrompt(taskName){
   const a = HR_ASSIGNMENTS[taskName];
   const box = document.getElementById('draft-prompt-box');
+
+  // Special case: Extended Conversation prompts pull full weekly detail from ECP_WEEKLY
+  const ecpMatch = taskName.match(/^Extended Conversation, Week (\d+) Prompt$/);
+  if(ecpMatch && typeof ECP_WEEKLY !== 'undefined' && ECP_WEEKLY[ecpMatch[1]]){
+    const wk = ECP_WEEKLY[ecpMatch[1]];
+    let html = '';
+    html += `<div class="prompt-meta">`;
+    if(a && a.due) html += `<span class="prompt-pill">📅 Due ${escHtml(a.due)}</span>`;
+    html += `</div>`;
+    html += `<div class="prompt-instructions">Meet with your ECP this week. Use the prompts below if you're unsure where to lead the conversation — feel free to guide things naturally instead.</div>`;
+    if(wk.skills && wk.skills.length){
+      html += `<div class="prompt-section-heading">Skills to Practice</div>`;
+      html += `<ul class="prompt-questions">`;
+      wk.skills.forEach(s=>{html += `<li>${escHtml(s)}</li>`;});
+      html += `</ul>`;
+    }
+    html += `<div class="prompt-section-heading">Conversation Prompts</div>`;
+    html += `<ul class="prompt-questions">`;
+    wk.prompts.forEach(p=>{html += `<li>${escHtml(p)}</li>`;});
+    html += `</ul>`;
+    html += `<div class="prompt-section-heading">Questions for Reflection (after your meeting)</div>`;
+    html += `<ul class="prompt-questions">`;
+    wk.reflection.forEach(r=>{html += `<li>${escHtml(r)}</li>`;});
+    html += `</ul>`;
+    html += `<div class="prompt-format"><strong>Log:</strong> after reflecting on your time, summarize your thoughts in 3-5 sentences below.</div>`;
+    box.innerHTML = html;
+    box.style.display = 'block';
+    return;
+  }
+
   if(!a){
     box.innerHTML = `<div class="nb-placeholder">No specific instructions loaded yet for this assignment. Write freely below — your draft still saves and syncs.</div>`;
     box.style.display = 'block';
@@ -1666,6 +1730,11 @@ function renderAssignmentPrompt(taskName){
     html += `<ul class="prompt-questions">`;
     a.questions.forEach(q=>{html += `<li>${escHtml(q)}</li>`;});
     html += `</ul>`;
+  }
+
+  const hasFillableQuestions = (a.questions && a.questions.length) || (a.sections && a.sections.some(s=>s.questions && s.questions.length));
+  if(hasFillableQuestions){
+    html += `<button class="filter-btn" style="background:var(--green);color:#fff;border:none;margin-top:4px;" onclick="useTemplate()">📋 Insert Questions into Draft</button>`;
   }
 
   if(a.requirements && a.requirements.length){
@@ -6798,6 +6867,393 @@ const HR_ASSIGNMENTS = {
     points: "Ungraded",
     instructions: "Write 3-5 sentences reflecting on where you see points of contact between what you read this week in Yalom's book and Scripture.",
     requirements: ["3-5 sentences"],
+  },
+};
+
+Object.assign(HR_ASSIGNMENTS, {
+  // ── Weeks 3, 4, 5, 6, 7, 8, 9 Extended Conversation prompts (identical except due date) ──
+  "Extended Conversation, Week 3 Prompt": {
+    due: "see Canvas for current date",
+    points: "Ungraded",
+    instructions: "Meet with your ECP. After reflecting on your meeting time, summarize your thoughts in 3-5 sentences and record them in your ECP log (see the Week 3 prompts in the ECP Log assignment). Use your reflections to help prepare for your Final Paper.",
+    requirements: ["3-5 sentence log entry", "Use the Week 3 ECP Log conversation prompts"],
+    isMeeting: true,
+  },
+  "Extended Conversation, Week 4 Prompt": {
+    due: "see Canvas for current date",
+    points: "Ungraded",
+    instructions: "Meet with your ECP. After reflecting on your meeting time, summarize your thoughts in 3-5 sentences and record them in your ECP log (see the Week 4 prompts in the ECP Log assignment). Use your reflections to help prepare for your Final Paper.",
+    requirements: ["3-5 sentence log entry", "Use the Week 4 ECP Log conversation prompts"],
+    isMeeting: true,
+  },
+  "Extended Conversation, Week 5 Prompt": {
+    due: "see Canvas for current date",
+    points: "Ungraded",
+    instructions: "Meet with your ECP. After reflecting on your meeting time, summarize your thoughts in 3-5 sentences and record them in your ECP log (see the Week 5 prompts in the ECP Log assignment). Use your reflections to help prepare for your Final Paper.",
+    requirements: ["3-5 sentence log entry", "Use the Week 5 ECP Log conversation prompts"],
+    isMeeting: true,
+  },
+  "Extended Conversation, Week 6 Prompt": {
+    due: "Sat Aug 1, 2026, 10:59pm",
+    points: "Ungraded",
+    instructions: "Meet with your ECP. After reflecting on your meeting time, summarize your thoughts in 3-5 sentences and record them in your ECP log (see the Week 6 prompts in the ECP Log assignment). Use your reflections to help prepare for your Final Paper.",
+    requirements: ["3-5 sentence log entry", "Use the Week 6 ECP Log conversation prompts"],
+    isMeeting: true,
+  },
+  "Extended Conversation, Week 7 Prompt": {
+    due: "Sat Aug 8, 2026, 10:59pm",
+    points: "Ungraded",
+    instructions: "Meet with your ECP. After reflecting on your meeting time, summarize your thoughts in 3-5 sentences and record them in your ECP log (see the Week 7 prompts in the ECP Log assignment). Use your reflections to help prepare for your Final Paper.",
+    requirements: ["3-5 sentence log entry", "Use the Week 7 ECP Log conversation prompts"],
+    isMeeting: true,
+  },
+  "Extended Conversation, Week 8 Prompt": {
+    due: "Sat Aug 15, 2026, 10:59pm",
+    points: "Ungraded",
+    instructions: "Meet with your ECP. After reflecting on your meeting time, summarize your thoughts in 3-5 sentences and record them in your ECP log (see the Week 8 prompts in the ECP Log assignment). Use your reflections to help prepare for your Final Paper.",
+    requirements: ["3-5 sentence log entry", "Use the Week 8 ECP Log conversation prompts"],
+    isMeeting: true,
+  },
+  "Extended Conversation, Week 9 Prompt": {
+    due: "Sat Aug 22, 2026, 10:59pm",
+    points: "Ungraded",
+    instructions: "Meet with your ECP. After reflecting on your meeting time, summarize your thoughts in 3-5 sentences and record them in your ECP log (see the Week 9 prompts in the ECP Log assignment). Use your reflections to help prepare for your Final Paper.",
+    requirements: ["3-5 sentence log entry", "Use the Week 9 ECP Log conversation prompts"],
+    isMeeting: true,
+  },
+
+  // ── Weeks 3-9 Yalom Reading Reflections (identical except due date) ──
+  "Yalom Reading Reflections, Week 3": {
+    due: "see Canvas for current date",
+    points: "Ungraded",
+    instructions: "Write 3-5 sentences reflecting on where you see points of contact between what you read this week in Yalom's book and Scripture.",
+    requirements: ["3-5 sentences"],
+  },
+  "Yalom Reading Reflections, Week 4": {
+    due: "see Canvas for current date",
+    points: "Ungraded",
+    instructions: "Write 3-5 sentences reflecting on where you see points of contact between what you read this week in Yalom's book and Scripture.",
+    requirements: ["3-5 sentences"],
+  },
+  "Yalom Reading Reflections, Week 5": {
+    due: "see Canvas for current date",
+    points: "Ungraded",
+    instructions: "Write 3-5 sentences reflecting on where you see points of contact between what you read this week in Yalom's book and Scripture.",
+    requirements: ["3-5 sentences"],
+  },
+  "Yalom Reading Reflections, Week 6": {
+    due: "Sat Aug 1, 2026, 10:59pm",
+    points: "Ungraded",
+    instructions: "Write 3-5 sentences reflecting on where you see points of contact between what you read this week in Yalom's book and Scripture.",
+    requirements: ["3-5 sentences"],
+  },
+  "Yalom Reading Reflections, Week 7": {
+    due: "Sat Aug 8, 2026, 10:59pm",
+    points: "Ungraded",
+    instructions: "Write 3-5 sentences reflecting on where you see points of contact between what you read this week in Yalom's book and Scripture.",
+    requirements: ["3-5 sentences"],
+  },
+  "Yalom Reading Reflections, Week 8": {
+    due: "Sat Aug 15, 2026, 10:59pm",
+    points: "Ungraded",
+    instructions: "Write 3-5 sentences reflecting on where you see points of contact between what you read this week in Yalom's book and Scripture.",
+    requirements: ["3-5 sentences"],
+  },
+  "Yalom Reading Reflections, Week 9": {
+    due: "Sat Aug 22, 2026, 10:59pm",
+    points: "Ungraded",
+    instructions: "Write 3-5 sentences reflecting on where you see points of contact between what you read this week in Yalom's book and Scripture.",
+    requirements: ["3-5 sentences"],
+  },
+
+  // ── Reflection Papers ──
+  "Reflection Paper 1": {
+    due: "see Canvas for current date",
+    points: "100 points possible",
+    instructions: "Full instructions for this paper are still being gathered from Canvas — check back soon, or write freely below in the meantime.",
+    requirements: [],
+  },
+  "Reflection Paper 2": {
+    due: "Sat Jul 25, 2026, 10:59pm",
+    points: "100 points possible",
+    instructions: "Have you heard the story attributed to Ernest Hemingway, that at lunch with other writers he boasted he could write a novel in six words? He bet that he could, then penned, \"For sale, baby shoes, never worn.\" This is understood to be an urban myth rather than a true account, but it has inspired writers and teachers to take up the challenge! Think about what is most important to you — a key feature of your faith, life, or character, or what you desire to achieve. This is challenging, but we are looking for creativity here. The skill is taking lots of data about a person and offering a succinct summary that truly captures them. A few examples: \"Loving God and others, a blessing.\" / \"Music opens my heart and eyes.\" / \"Faithful to the end; can I?\" / \"Let me ask before I speak.\"",
+    sections: [
+      {
+        heading: "Part 1: Describe Yourself",
+        body: "Describe yourself in 6 words that tell the story of you. (5-7 words are acceptable.) Expand this into a longer story that gives an explanation for your summary.",
+        pageCount: "1 page",
+      },
+      {
+        heading: "Part 2: Describe Someone Else",
+        body: "Describe someone else using the same method, with an explanation. Consider sending the person who blessed you a thank-you note.",
+        pageCount: "1 page",
+      },
+    ],
+    requirements: ["Total page count: 2 pages"],
+    format: true,
+  },
+  "Reflection Paper 3": {
+    due: "Sat Aug 8, 2026, 10:59pm",
+    points: "100 points possible",
+    instructions: "Write a 2-page paper on Lecture 26, Keep in Step with the Spirit. Use the following headings:",
+    questions: [
+      "Summarize the lecture.",
+      "Reflect on how the lecture affected you. (Be personal, thoughtful, and specific.)",
+      "Imagine how you would use this with another person.",
+    ],
+    requirements: ["Page count: 2 pages", "Use each prompt as a heading"],
+    format: true,
+  },
+
+  // ── Final Paper ──
+  "Final Paper": {
+    due: "Sat Aug 29, 2026, 10:59pm",
+    points: "100 points possible",
+    instructions: "In this paper you will consider the goals of the course, growth you have experienced in your conversation skills, and ways you hope to continue seeing this growth in yourself and others around you. Please label each part of your paper with a heading (\"Part 1\", etc).",
+    sections: [
+      {
+        heading: "Part 1: Your Extended Conversation Partner",
+        body: "Reflect on your time with your conversation partner.",
+        questions: [
+          "What skills did you learn and use in conversations with your ECP? Share specific conversations to show it was used.",
+          "Overall, what concepts and skills were most helpful to you in your ECP relationship?",
+          "What concept or skill did you struggle with in your ECP relationship?",
+          "How might these have been different or similar with another individual?",
+          "In what areas did you, or didn't you, experience progress from your initial self-assessment in the context of your extended conversations? How is the Spirit moving in these areas?",
+          "How do you want to grow?",
+        ],
+        pageCount: "2 pages",
+      },
+      {
+        heading: "Part 2: One Skill, Grounded in Scripture",
+        body: "Speak personally about one skill using Scripture. Take one skill discussed in the lectures that has taken root and identify how you applied it in your own life — both in your extended conversation and in your church relationships. What is the rich biblical foundation that animates and brings this skill to life? How does the skill connect directly to Scripture? Be specific.",
+        pageCount: "1–1.5 pages",
+      },
+      {
+        heading: "Part 3: The Spirit's Broader Work",
+        body: "Consider how the Spirit has shaped you through these skills more broadly.",
+        questions: [
+          "How do they change the way you live with people in your church?",
+          "Where have you seen significant application of methods to one individual relationship you have in your church?",
+          "In what ways do you anticipate the Spirit continuing to work in these areas in the context of church or your small group community?",
+        ],
+        pageCount: "1–1.5 pages",
+      },
+    ],
+    requirements: ["Total page count: 4–5 pages", "Label each part with a heading (\"Part 1\", etc.)", "Draw on your ECP Log entries throughout the course"],
+    format: true,
+  },
+
+  // ── Small Groups ──
+  "Small Group 2 (Prompts & Questions)": {
+    due: "see Canvas for current date",
+    points: "Ungraded",
+    instructions: "Full discussion prompts for this small group session are still being gathered from Canvas.",
+    requirements: ["Each member marks attendance on the Attendance Quiz afterward"],
+    isMeeting: true,
+  },
+  "Small Group 3 (Prompts & Questions)": {
+    due: "Sat Aug 1, 2026, 10:59pm",
+    points: "Ungraded",
+    instructions: "Discuss the following prompts together, then pray for one another as you close.",
+    sections: [
+      {
+        heading: "From Side by Side, ch. 14",
+        body: "How might you move toward someone doing spiritual battle right now?",
+      },
+      {
+        heading: "From Side by Side, ch. 16",
+        body: "Have you ever been confronted about your sin in a way that was edifying and fruitful? What made it so? Have you ever been confronted about your sin in a way that was unedifying and hurtful? What made it so?",
+      },
+    ],
+    requirements: ["Pray for one another as you close", "Each member marks attendance on the Attendance Quiz afterward", "(Optional) submit group questions to your OI before the next Live Engagement"],
+    isMeeting: true,
+  },
+  "Small Group 4 (Prompts & Questions)": {
+    due: "Sat Aug 15, 2026, 10:59pm",
+    points: "Ungraded",
+    instructions: "Review ways you have grown in your self-assessments at the beginning of the course and the skills you've discussed in lecture with one another — this will be helpful as you begin work on your final paper. Also brainstorm ways Caring for One Another could be a helpful tool in your church's small groups, and areas that might be challenging.",
+    requirements: ["Each member marks attendance on the Attendance Quiz afterward", "(Optional) submit group questions to your OI before the next Live Engagement"],
+    isMeeting: true,
+  },
+});
+
+
+
+Object.assign(HR_ASSIGNMENTS, {
+  "Reflection Paper 1": {
+    due: "Sat Jul 11, 2026, 10:59pm",
+    points: "100 points possible",
+    instructions: "Small talk can be defined as polite and casual conversation about unimportant and uncontroversial matters — sports, weather, a TV show or movie, a recent purchase, talk about other people that might move toward gossip. Many cultures use small talk as a way to first get to know someone. Small talk is usually a good thing and part of knowing someone, but how can you become increasingly skillful with your small talk? Our goal is to become more skillful in every conversation. Reflect on the lectures and readings completed so far and answer the following questions. Be personal, thoughtful, and specific.",
+    questions: [
+      "Do you engage in small talk? Why or why not?",
+      "How have you moved (nudged) small talk to even more important places? Give an example. Be specific.",
+      "How do you feel as you engage in small talk? Does it feel challenging? Do you enjoy it?",
+      "In light of this, what is your plan for growing in small talk? One thing. Be specific.",
+    ],
+    requirements: ["Page count: 1–2 pages", "Type each question as a heading before answering"],
+    format: true,
+    prepopulate: true,
+  },
+  "Small Group 2 (Prompts & Questions)": {
+    due: "Sat Jul 18, 2026, 10:59pm",
+    points: "Ungraded",
+    instructions: "Discuss the following prompts together, then pray for one another as you close.",
+    sections: [
+      {
+        heading: "From Side by Side, ch. 7",
+        body: "",
+        questions: [
+          "What are the qualifications of those who have helped you in your times of trouble?",
+          "What did your helpers do that was most helpful?",
+        ],
+      },
+      {
+        heading: "From Side by Side, ch. 12",
+        body: "What is your growing list of do's and don'ts with those who are suffering?",
+      },
+    ],
+    requirements: ["Pray for one another as you close", "Each member marks attendance on the Small Group Attendance Quiz", "(Optional) submit group questions to your OI before the next Live Engagement"],
+    isMeeting: true,
+  },
+  "Extended Conversation Partner Final Letter": {
+    due: "Week 10 — see Canvas for exact date",
+    points: "See Canvas for points",
+    instructions: "At the end of the course, write a letter to your conversation partner. Seek to be pastoral and encouraging. Share with your partner how you were blessed by them in your time together, the work of Christ you see in them, and the reflection of Christ evident in them. Submit the letter to the course instructor, and you're encouraged to send it to your partner as well.",
+    requirements: ["1 page", "Be pastoral and encouraging", "Share how you were blessed by them", "Name the work of Christ you see in them"],
+  },
+  "Extended Conversation Partner Log": {
+    due: "Week 10 — see Canvas for exact date",
+    points: "See Canvas for points",
+    instructions: "Submit your completed Extended Conversation Partner Log — the full record of your 3-5 sentence reflections from each weekly meeting (Weeks 2-9). You will not submit a log weekly; only the completed compilation is due in Week 10. Use the individual Week 2-9 Extended Conversation drafts in this app to build each entry, then compile them here for submission.",
+    requirements: ["Compile all 8 weekly 3-5 sentence log entries (Weeks 2-9)", "Submitted once, in Week 10"],
+  },
+});
+
+// ── ECP weekly conversation prompts & reflection questions (used inside each Extended Conversation draft) ──
+const ECP_WEEKLY = {
+  2: {
+    skills: [],
+    prompts: [
+      "How might you pray, with the other person, intentionally at the start of your time together?",
+      "What are the circumstances of their lives? As you get started with your conversation partner, keep in mind what you are learning about them. Nudge deeper.",
+      "Sample categories (no need to cover them all): family of origin; present family or friends; work; where the person has lived; important people today; interests and pleasures — and why; a summary of themselves in a sentence or image.",
+      "Has anything come out of the conversation that is important to pray? Then pray.",
+      "Remember to ask for one piece of feedback from your time together.",
+    ],
+    reflection: [
+      "How might this information become important in upcoming weeks?",
+      "What are you learning about how you personally have 1-on-1 conversations?",
+      "Reflect on your progress based on your self-assessment from Week 1.",
+      "How have you seen good in this person? Have you identified one thing that is good?",
+      "Thoughts for next time?",
+    ],
+  },
+  3: {
+    skills: ["Skill 1 - Accumulate Wisdom", "Skill 2 - Move Conversations", "Skill 3 - Self-Disclosure", "Skill 4 - Follow the Person"],
+    prompts: [
+      "How did the person come to Christ (if the person is a believer)?",
+      "What were the pivotal events in their lives? This is a move into the larger story.",
+      "What is most important now? Weightiest, best?",
+      "Try and use self-disclosure wisely in your conversation this week.",
+      "Remember to pray with your ECP at some point during your time together.",
+      "Remember to ask for one piece of feedback from your time together.",
+    ],
+    reflection: [
+      "Are you hearing what is important in your conversation? Consider examples of when you did or did not do this.",
+      "Did your use or lack of self-disclosure benefit or disadvantage your relationship?",
+      "Reflect on your progress based on your self-assessment from Week 1.",
+      "How have you seen the reflection of Christ? Thoughts for next time?",
+    ],
+  },
+  4: {
+    skills: ["Skill 5 - Consider Your Questions", "Skill 6 - Know the Experience"],
+    prompts: [
+      "Start your time by picking up a theme or topic from the last time you met.",
+      "\"For someone to know you well (like I hope to do), what do you think are the essentials for someone to know about you?\"",
+      "Consider the usefulness of asking questions, and seek to employ the skills on this topic discussed in lecture.",
+      "Remember to pray with your ECP at some point during your time together.",
+      "Remember to ask for one piece of feedback from your time together.",
+    ],
+    reflection: [
+      "Reflect afterwards on how this skill of considering your questions was or was not helpful. What went well, what did not?",
+      "Reflect on your progress based on your self-assessment from Week 1.",
+      "How have you seen the work of the Spirit? Thoughts for next time?",
+    ],
+  },
+  5: {
+    skills: ["Skill 7 - Connect Daily Life to God", "Skill 8 - Simplify Details", "Skill 9 - Distinguish Content & Process", "Skill 10 - Pause"],
+    prompts: [
+      "Listen for ways you and your conversation partner can connect everyday life to aspects of your relationship with God — especially things that don't seem to reflect that relationship but do.",
+      "What are they learning spiritually? Where do they feel spiritually needy or stuck? (An opportunity to pray together.)",
+      "Remember to pray with your ECP at some point during your time together.",
+      "Remember to ask for one piece of feedback from your time together.",
+    ],
+    reflection: [
+      "Reflect on how you and your partner connected everyday life to your/their relationship with God. How was this accomplished, and what impact did it make?",
+      "Reflect on your progress based on your self-assessment from Week 1.",
+      "What would be a suitable summary of your time together that you could speak to your partner next time?",
+    ],
+  },
+  6: {
+    skills: ["Skill 1 - Accumulate Wisdom", "Skill 2 - Be Personal", "Skill 3 - Everyday Language"],
+    prompts: [
+      "How has a passage of Scripture been good news for your extended conversation partner this week?",
+      "What are some characteristics of the ways Scripture is helpful?",
+      "Remember to pray with your ECP at some point during your time together.",
+      "Remember to ask for one piece of feedback from your time together.",
+    ],
+    reflection: [
+      "Reflect on the impact of hearing your partner's personal application of Scripture.",
+      "How were you (or weren't you) able to be personal?",
+      "Reflect on your progress based on your self-assessment from Week 1.",
+      "How have you seen good in this person? Thoughts for next time?",
+    ],
+  },
+  7: {
+    skills: ["Skill 4 - Keep in Step with the Spirit", "Skill 5 - Access Scripture Together"],
+    prompts: [
+      "Seek to understand what has been important recently in the person's life.",
+      "Where is the Spirit obviously working and leading?",
+      "Remember to pray with your ECP at some point during your time together.",
+      "Remember to ask for one piece of feedback from your time together.",
+    ],
+    reflection: [
+      "Reflect on your progress based on your self-assessment from Week 1.",
+      "Are you seeing the good and enjoying the person?",
+      "How have you seen the reflection of Christ? Thoughts for next time?",
+    ],
+  },
+  8: {
+    skills: ["Skill 6 - Distinguish Scripture and Advice", "Skill 7 - Skills with Sinners"],
+    prompts: [
+      "How does the Spirit speak to your ECP in their own sin? How have other people spoken to them about their own sin?",
+      "How do they hope to grow in Christ? Who do they want to be in 2 years?",
+      "What does growing in Jesus look like for them? How do they come to Christ with their sins?",
+      "What have people said or done that was helpful to their spiritual life?",
+      "What have people said or done, especially during hardships, that was hurtful?",
+      "Remember to pray with your ECP at some point during your time together.",
+      "Remember to ask for one piece of feedback from your time together.",
+    ],
+    reflection: [
+      "What have you learned already about how to speak about sin, by way of how the Spirit has spoken to you and how other people have spoken to you?",
+      "Reflect on your progress based on your self-assessment from Week 1.",
+      "How have you seen the work of the Spirit? Thoughts for next time?",
+    ],
+  },
+  9: {
+    skills: ["Skill 8 - Skills with Sufferers", "Skill 9 - Retell Stories"],
+    prompts: [
+      "What are they learning spiritually? Where do they feel spiritually needy or stuck? (An opportunity to pray together.)",
+      "What are some key words and images that describe your ECP? Share your reflections with them if you like.",
+      "Remember to pray with your ECP at some point during your time together.",
+      "Remember to ask for one piece of feedback from your time together.",
+    ],
+    reflection: [
+      "What are tendencies that you would like to change in how you care for sufferers?",
+      "Reflect on your progress based on your self-assessment from Week 1.",
+      "What would be a suitable summary of your time together that you could include in your letter to your partner?",
+    ],
   },
 };
 
