@@ -108,15 +108,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .notes-page{position:fixed;inset:0;z-index:500;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;flex-direction:column}
 .notes-page.open{display:flex}
 .notes-page-header{position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.font-size-toggle{font-size:14px;font-weight:700;color:var(--green);cursor:pointer;padding:4px 8px;border-radius:6px;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
+.font-size-toggle:active{background:var(--green-light);}
+.font-size-bar{display:none;align-items:center;gap:10px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);}
+.font-size-bar.open{display:flex;}
+.font-size-label{color:var(--muted);font-size:12px;flex-shrink:0;}
+.font-size-slider{flex:1;}
 .notes-back{font-size:15px;color:var(--green);font-weight:500;cursor:pointer;padding:4px 0;-webkit-tap-highlight-color:transparent;white-space:nowrap}
 .notes-page-title{font-size:15px;font-weight:600;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.notes-page-body{padding:16px 16px 60px;flex:1}
+.notes-page-body{padding:16px 16px 60px;flex:1;word-wrap:break-word;overflow-wrap:break-word;}
 
 /* Notebook content */
 .nb-section{margin-top:16px}
-.nb-section-heading{font-size:13px;font-weight:600;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--green-light)}
+.nb-section-heading{font-size:calc(var(--reading-font-size, 14px) - 1px);font-weight:600;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--green-light)}
 @media(prefers-color-scheme:dark){.nb-section-heading{color:#5DCAA5;border-color:#0a3326}}
-.nb-item{font-size:14px;color:var(--text);line-height:1.55;padding:4px 0 4px 12px;border-left:2px solid var(--border);margin-bottom:4px}
+.nb-item{font-size:var(--reading-font-size, 14px);color:var(--text);line-height:1.6;padding:4px 0 4px 12px;border-left:2px solid var(--border);margin-bottom:4px;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto;}
 .nb-item.scripture{font-style:italic;color:var(--muted);border-left-color:var(--green-light)}
 .nb-placeholder{font-size:13px;color:var(--hint);font-style:italic;padding:4px 0 4px 12px;border-left:2px dashed var(--border)}
 .draft-prompt-box{background:var(--green-light);border:1px solid var(--green);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:14px;line-height:1.5;}
@@ -247,6 +253,12 @@ if(localStorage.getItem(LOCK_STORAGE_KEY) === '1'){
   <div class="notes-page-header">
     <span class="notes-back" onclick="closePanel()">← Back</span>
     <div class="notes-page-title" id="panel-title">Notes</div>
+    <span class="font-size-toggle" onclick="toggleFontSizeBar(this)">Aa</span>
+  </div>
+  <div class="font-size-bar" id="font-size-bar-1">
+    <span class="font-size-label">A</span>
+    <input type="range" min="13" max="22" value="14" class="font-size-slider" oninput="setReadingFontSize(this.value)">
+    <span class="font-size-label" style="font-size:20px;">A</span>
   </div>
   <div class="notes-page-body" id="panel-body"></div>
 </div>
@@ -255,6 +267,12 @@ if(localStorage.getItem(LOCK_STORAGE_KEY) === '1'){
   <div class="notes-page-header">
     <span class="notes-back" onclick="closeReading()">← Back</span>
     <div class="notes-page-title" id="reading-page-title">Reading</div>
+    <span class="font-size-toggle" onclick="toggleFontSizeBar(this)">Aa</span>
+  </div>
+  <div class="font-size-bar" id="font-size-bar-2">
+    <span class="font-size-label">A</span>
+    <input type="range" min="13" max="22" value="14" class="font-size-slider" oninput="setReadingFontSize(this.value)">
+    <span class="font-size-label" style="font-size:20px;">A</span>
   </div>
   <div class="notes-page-body" id="reading-page-body"></div>
 </div>
@@ -1680,6 +1698,24 @@ function openReading(weekId){
 function closeReading(){
   document.getElementById('reading-page').classList.remove('open');
 }
+
+// ── Reading font size control ───────────────────────────────
+function toggleFontSizeBar(toggleEl){
+  const bar = toggleEl.parentElement.nextElementSibling;
+  bar.classList.toggle('open');
+}
+function setReadingFontSize(px){
+  document.documentElement.style.setProperty('--reading-font-size', px+'px');
+  try{ localStorage.setItem('readingFontSize', px); }catch(e){}
+}
+(function initReadingFontSize(){
+  let saved = '14';
+  try{ saved = localStorage.getItem('readingFontSize') || '14'; }catch(e){}
+  document.documentElement.style.setProperty('--reading-font-size', saved+'px');
+  document.addEventListener('DOMContentLoaded', ()=>{
+    document.querySelectorAll('.font-size-slider').forEach(s=>{ s.value = saved; });
+  });
+})();
 
 // ── 3 Trees & 8 Questions Model (DBC) ──────────────────────
 function openModel(){
