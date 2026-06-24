@@ -2011,20 +2011,21 @@ function render(){
         </div>`;
       });
       if(hasVisible)bodyHTML+=`<div class="sec-lbl">${s.label}</div>${secHTML}`;
-    });
 
-    // Reading button for weeks with required reading (both courses)
-    const readingsForCourse = currentCourse === 'hr' ? HR_READINGS : DBC_READINGS;
-    if(readingsForCourse[w.id] && (filter==='all'||filter==='read')){
-      bodyHTML += `<div class="sec-lbl">Reading</div>
-        <div class="task" onclick="openReading(${w.id})" style="cursor:pointer;">
-          <div class="task-check" style="background:transparent;border-color:var(--green);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:14px;">📚</div>
-          <div class="task-body">
-            <div class="task-name">Required Reading — Week ${w.id}</div>
-            <div class="task-meta"><span class="pill pill-time">${readingsForCourse[w.id].length} article${readingsForCourse[w.id].length>1?'s':''}</span></div>
-          </div>
-        </div>`;
-    }
+      // Reading button appended right after the Read section itself
+      if(s.type === 'read' && (filter==='all'||filter==='read')){
+        const readingsForCourse = currentCourse === 'hr' ? HR_READINGS : DBC_READINGS;
+        if(readingsForCourse[w.id]){
+          bodyHTML += `<div class="task" onclick="openReading(${w.id})" style="cursor:pointer;">
+            <div class="task-check" style="background:transparent;border-color:var(--green);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:14px;">📚</div>
+            <div class="task-body">
+              <div class="task-name">Required Reading — Week ${w.id}</div>
+              <div class="task-meta"><span class="pill pill-time">${readingsForCourse[w.id].length} article${readingsForCourse[w.id].length>1?'s':''}</span></div>
+            </div>
+          </div>`;
+        }
+      }
+    });
 
     const pct=wTotal>0?Math.round(wDone/wTotal*100):0;
     const isOpen=openWeeks.has(w.id);
